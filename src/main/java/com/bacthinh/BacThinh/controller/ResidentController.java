@@ -29,7 +29,7 @@ public class ResidentController {
     private final ResidentService residentService;
 
     @Operation(summary = "Create a new resident", description = "ADMIN creates a new resident.")
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<ApiResponse<ResidentResponse>> createResident(@RequestBody @Valid ResidentCreationRequest request) {
         ResidentResponse response = residentService.createResident(request);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -115,7 +115,7 @@ public class ResidentController {
     }
 
     @Operation(summary = "Update resident", description = "ADMIN updates resident information.")
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<ApiResponse<ResidentResponse>> updateResident(
             @PathVariable Long id,
             @RequestBody @Valid ResidentUpdateRequest request) {
@@ -124,7 +124,7 @@ public class ResidentController {
     }
 
     @Operation(summary = "Delete resident", description = "ADMIN deletes a resident by ID.")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<ApiResponse<String>> deleteResident(@PathVariable Long id) {
         residentService.deleteResident(id);
         return ResponseEntity.ok(ApiResponse.success("Resident deleted successfully!", "Resident deleted successfully!"));

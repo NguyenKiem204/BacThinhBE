@@ -103,7 +103,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Để tương thích với UserDetailsService, nhưng thực chất username là email
         return loadUserByEmail(username);
     }
 }

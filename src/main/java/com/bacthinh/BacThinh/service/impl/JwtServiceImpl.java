@@ -18,6 +18,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -43,8 +44,10 @@ public class JwtServiceImpl implements JwtService {
                     .issuer(jwtProperties.getIssuer())
                     .issueTime(Date.from(now))
                     .expirationTime(Date.from(expiration))
+                    .jwtID(UUID.randomUUID().toString()) // Thêm unique JWT ID
                     .claim("userId", user.getId())
                     .claim("authorities", authorities)
+                    .claim("tokenType", "access") // Phân biệt loại token
                     .build();
 
             SignedJWT signedJWT = new SignedJWT(
@@ -75,8 +78,10 @@ public class JwtServiceImpl implements JwtService {
                     .issuer(jwtProperties.getIssuer())
                     .issueTime(Date.from(now))
                     .expirationTime(Date.from(expiration))
+                    .jwtID(UUID.randomUUID().toString()) // Thêm unique JWT ID
                     .claim("userId", user.getId())
                     .claim("tokenType", "refresh")
+                    .claim("nonce", System.nanoTime()) // Thêm nonce để đảm bảo tính duy nhất
                     .build();
 
             SignedJWT signedJWT = new SignedJWT(
@@ -141,6 +146,17 @@ public class JwtServiceImpl implements JwtService {
         } catch (ParseException e) {
             log.error("Error extracting expiration from token", e);
             throw new RuntimeException("Could not extract expiration from token", e);
+        }
+    }
+
+    // Thêm method để lấy JWT ID
+    public String getJwtIdFromToken(String token) {
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            return signedJWT.getJWTClaimsSet().getJWTID();
+        } catch (ParseException e) {
+            log.error("Error extracting JWT ID from token", e);
+            throw new RuntimeException("Could not extract JWT ID from token", e);
         }
     }
 }
