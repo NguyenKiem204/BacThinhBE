@@ -23,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -105,7 +106,6 @@ public class NewsServiceImpl implements NewsService {
         News news = newsRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("News", id));
 
-        // Increment view count
         newsRepository.incrementViewCount(id);
         news.setViews(news.getViews() + 1);
 
@@ -126,6 +126,7 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<NewsResponse> getAllNews(Pageable pageable) {
         return newsRepository.findAll(pageable)
                 .map(newsMapper::toResponse);
@@ -239,10 +240,9 @@ public class NewsServiceImpl implements NewsService {
     @Override
     @Transactional
     public NewsResponse getNewsWithViewIncrement(Long id) {
-        return getNewsById(id); // This method already increments view count
+        return getNewsById(id);
     }
 
-    // Utility methods
     private String slugValid(String title, String slugRequest, Long excludeId) {
         String baseSlug;
         if (slugRequest != null && !slugRequest.isBlank()) {
@@ -273,14 +273,18 @@ public class NewsServiceImpl implements NewsService {
             return "news-" + System.currentTimeMillis();
         }
 
-        return input.toLowerCase()
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        String slug = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+
+        slug = slug.replaceAll("[Đ]", "D").replaceAll("[đ]", "d");
+
+        return slug.toLowerCase()
                 .replaceAll("[^a-z0-9\\s-]", "")
                 .replaceAll("\\s+", "-")
                 .replaceAll("-+", "-")
                 .replaceAll("^-|-$", "");
     }
 
-    // Additional utility methods for advanced features
     public Page<NewsResponse> getRelatedNews(Long newsId, Pageable pageable) {
         News news = newsRepository.findById(newsId)
                 .orElseThrow(() -> new NotFoundException("News", newsId));

@@ -1,6 +1,5 @@
 package com.bacthinh.BacThinh.repository;
 
-import com.bacthinh.BacThinh.entity.Category;
 import com.bacthinh.BacThinh.entity.News;
 import com.bacthinh.BacThinh.entity.NewsStatus;
 import jakarta.transaction.Transactional;
@@ -16,12 +15,49 @@ import java.util.Optional;
 
 public interface NewsRepository extends JpaRepository<News, Long> {
 
+    // Sửa các method để thêm JOIN FETCH
+    @Query("SELECT n FROM News n JOIN FETCH n.category WHERE n.id = :id")
+    Optional<News> findByIdWithCategory(@Param("id") Long id);
+
+    @Query("SELECT n FROM News n JOIN FETCH n.category WHERE n.slug = :slug")
+    Optional<News> findBySlugWithCategory(@Param("slug") String slug);
+
+    // Method để load tất cả News với Category
+    @Query("SELECT n FROM News n JOIN FETCH n.category")
+    Page<News> findAllWithCategory(Pageable pageable);
+
     Optional<News> findById(Long id);
     Optional<News> findBySlug(String slug);
     boolean existsBySlug(String slug);
     boolean existsBySlugAndIdNot(String slug, Long id);
     boolean existsById(Long id);
 
+    // Thêm JOIN FETCH cho các query trả về Page<News>
+    @Query("SELECT n FROM News n JOIN FETCH n.category WHERE n.category.id = :categoryId")
+    Page<News> findByCategory_IdWithCategory(@Param("categoryId") Long categoryId, Pageable pageable);
+
+    @Query("SELECT n FROM News n JOIN FETCH n.category WHERE n.status = :status")
+    Page<News> findByStatusWithCategory(@Param("status") NewsStatus status, Pageable pageable);
+
+    @Query("SELECT n FROM News n JOIN FETCH n.category WHERE n.author.id = :authorId")
+    Page<News> findByAuthor_IdWithCategory(@Param("authorId") Long authorId, Pageable pageable);
+
+    @Query("SELECT n FROM News n JOIN FETCH n.category WHERE n.category.id = :categoryId AND n.status = :status")
+    Page<News> findByCategory_IdAndStatusWithCategory(@Param("categoryId") Long categoryId, @Param("status") NewsStatus status, Pageable pageable);
+
+    @Query("SELECT n FROM News n JOIN FETCH n.category WHERE n.author.id = :authorId AND n.status = :status")
+    Page<News> findByAuthor_IdAndStatusWithCategory(@Param("authorId") Long authorId, @Param("status") NewsStatus status, Pageable pageable);
+
+    @Query("SELECT n FROM News n JOIN FETCH n.category WHERE n.category.id = :categoryId AND n.author.id = :authorId")
+    Page<News> findByCategory_IdAndAuthor_IdWithCategory(@Param("categoryId") Long categoryId, @Param("authorId") Long authorId, Pageable pageable);
+
+    @Query("SELECT n FROM News n JOIN FETCH n.category WHERE n.category.id = :categoryId AND n.status = :status AND n.author.id = :authorId")
+    Page<News> findByCategory_IdAndStatusAndAuthor_IdWithCategory(@Param("categoryId") Long categoryId, @Param("status") NewsStatus status, @Param("authorId") Long authorId, Pageable pageable);
+
+    @Query("SELECT n FROM News n JOIN FETCH n.category WHERE LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<News> findByTitleContainingIgnoreCaseWithCategory(@Param("keyword") String keyword, Pageable pageable);
+
+    // Giữ nguyên method gốc nhưng không dùng
     Page<News> findByCategory_Id(Long categoryId, Pageable pageable);
     Page<News> findByStatus(NewsStatus status, Pageable pageable);
     Page<News> findByAuthor_Id(Long authorId, Pageable pageable);
@@ -33,7 +69,7 @@ public interface NewsRepository extends JpaRepository<News, Long> {
 
     @Query("""
                 SELECT n FROM News n
-                JOIN n.category c
+                JOIN FETCH n.category c
                 WHERE LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
                    OR LOWER(n.summary) LIKE LOWER(CONCAT('%', :keyword, '%'))
                    OR LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
@@ -42,7 +78,7 @@ public interface NewsRepository extends JpaRepository<News, Long> {
 
     @Query("""
             SELECT n FROM News n
-            JOIN n.category c
+            JOIN FETCH n.category c
             JOIN n.author a
             WHERE (:keyword IS NULL OR 
                    LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
@@ -62,11 +98,19 @@ public interface NewsRepository extends JpaRepository<News, Long> {
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable);
+
+    @Query("SELECT n FROM News n JOIN FETCH n.category WHERE n.status = :status ORDER BY n.views DESC, n.createdAt DESC")
+    Page<News> findByStatusOrderByViewsDescCreatedAtDescWithCategory(@Param("status") NewsStatus status, Pageable pageable);
+
+    @Query("SELECT n FROM News n JOIN FETCH n.category WHERE n.status = :status ORDER BY n.createdAt DESC")
+    Page<News> findByStatusOrderByCreatedAtDescWithCategory(@Param("status") NewsStatus status, Pageable pageable);
+
     Page<News> findByStatusOrderByViewsDescCreatedAtDesc(NewsStatus status, Pageable pageable);
     Page<News> findByStatusOrderByCreatedAtDesc(NewsStatus status, Pageable pageable);
 
     @Query("""
             SELECT n FROM News n
+            JOIN FETCH n.category
             WHERE n.status = :status
               AND n.createdAt >= :startDate
             ORDER BY n.views DESC, n.createdAt DESC
@@ -77,6 +121,7 @@ public interface NewsRepository extends JpaRepository<News, Long> {
 
     @Query("""
             SELECT n FROM News n
+            JOIN FETCH n.category
             WHERE n.createdAt >= :startDate
               AND n.createdAt <= :endDate
             ORDER BY n.createdAt DESC
@@ -105,6 +150,7 @@ public interface NewsRepository extends JpaRepository<News, Long> {
 
     @Query("""
             SELECT n FROM News n
+            JOIN FETCH n.category
             WHERE n.category.id = :categoryId
               AND n.status = :status
               AND n.createdAt >= :since
@@ -116,6 +162,7 @@ public interface NewsRepository extends JpaRepository<News, Long> {
                                              Pageable pageable);
     @Query("""
             SELECT n FROM News n
+            JOIN FETCH n.category
             WHERE n.category.id = :categoryId
               AND n.id != :excludeId
               AND n.status = :status
@@ -138,4 +185,3 @@ public interface NewsRepository extends JpaRepository<News, Long> {
             """)
     Object getNewsStatistics(@Param("status") NewsStatus status);
 }
-
