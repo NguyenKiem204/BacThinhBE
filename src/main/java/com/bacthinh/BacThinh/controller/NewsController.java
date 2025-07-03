@@ -66,7 +66,7 @@ public class NewsController {
 
     @Operation(summary = "Get all news", description = "Get all news with pagination and sorting.")
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<NewsResponse>>> getAllResidents(
+    public ResponseEntity<ApiResponse<Page<NewsResponse>>> getAllNews(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,

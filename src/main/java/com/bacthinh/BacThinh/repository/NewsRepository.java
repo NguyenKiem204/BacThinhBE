@@ -9,20 +9,20 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+@Repository
 public interface NewsRepository extends JpaRepository<News, Long> {
 
-    // Sửa các method để thêm JOIN FETCH
     @Query("SELECT n FROM News n JOIN FETCH n.category WHERE n.id = :id")
     Optional<News> findByIdWithCategory(@Param("id") Long id);
 
     @Query("SELECT n FROM News n JOIN FETCH n.category WHERE n.slug = :slug")
     Optional<News> findBySlugWithCategory(@Param("slug") String slug);
 
-    // Method để load tất cả News với Category
     @Query("SELECT n FROM News n JOIN FETCH n.category")
     Page<News> findAllWithCategory(Pageable pageable);
 

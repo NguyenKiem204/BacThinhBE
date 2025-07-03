@@ -133,6 +133,7 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<NewsResponse> searchNews(String keyword, Pageable pageable) {
         return newsRepository.findByKeyword(keyword, pageable)
                 .map(newsMapper::toResponse);
