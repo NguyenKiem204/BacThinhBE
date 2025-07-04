@@ -116,6 +116,8 @@ public class WeeklyScheduleController {
 
         log.info("Searching weekly schedules with criteria: {}", request);
         PagedWeeklyScheduleResponse response = weeklyScheduleService.searchWeeklySchedules(request);
+
+        log.info("PagedWeeklyScheduleResponse: {}", response);
         return ResponseEntity.ok(response);
     }
 

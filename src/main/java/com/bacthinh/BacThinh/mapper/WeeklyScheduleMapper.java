@@ -51,14 +51,17 @@ public interface WeeklyScheduleMapper {
         return date.getYear();
     }
 
-    @Mapping(target = "content", source = "content")
-    @Mapping(target = "pageNumber", source = "number")
-    @Mapping(target = "pageSize", source = "size")
-    @Mapping(target = "totalElements", source = "totalElements")
-    @Mapping(target = "totalPages", source = "totalPages")
-    @Mapping(target = "first", source = "first")
-    @Mapping(target = "last", source = "last")
-    @Mapping(target = "hasNext", expression = "java(!page.isLast())")
-    @Mapping(target = "hasPrevious", expression = "java(!page.isFirst())")
-    PagedWeeklyScheduleResponse toPagedResponse(Page<WeeklySchedule> page);
+    default PagedWeeklyScheduleResponse toPagedResponse(Page<WeeklySchedule> page) {
+        return PagedWeeklyScheduleResponse.builder()
+                .content(toResponseList(page.getContent())) // <-- convert entity list to DTO list
+                .pageNumber(page.getNumber())
+                .pageSize(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .first(page.isFirst())
+                .last(page.isLast())
+                .hasNext(!page.isLast())
+                .hasPrevious(!page.isFirst())
+                .build();
+    }
 }
