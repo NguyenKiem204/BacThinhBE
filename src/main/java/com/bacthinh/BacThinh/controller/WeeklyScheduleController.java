@@ -1,6 +1,7 @@
 package com.bacthinh.BacThinh.controller;
 
 import com.bacthinh.BacThinh.dto.request.CreateWeeklyScheduleRequest;
+import com.bacthinh.BacThinh.dto.request.StatusUpdateRequest;
 import com.bacthinh.BacThinh.dto.request.UpdateWeeklyScheduleRequest;
 import com.bacthinh.BacThinh.dto.request.WeeklyScheduleSearchRequest;
 import com.bacthinh.BacThinh.dto.response.PagedWeeklyScheduleResponse;
@@ -156,6 +157,14 @@ public class WeeklyScheduleController {
     public ResponseEntity<WeeklyScheduleResponse> publishWeeklySchedule(@PathVariable Long id) {
         log.info("Publishing weekly schedule ID: {}", id);
         WeeklyScheduleResponse response = weeklyScheduleService.publishWeeklySchedule(id);
+        return ResponseEntity.ok(response);
+    }
+    @PutMapping("/{id}/status")
+    @Operation(summary = "Update weekly schedule status", description = "Change status to DRAFT, PUBLISHED, or ARCHIVED")
+    public ResponseEntity<WeeklyScheduleResponse> updateStatus(
+            @PathVariable Long id,
+            @RequestBody StatusUpdateRequest request) {
+        WeeklyScheduleResponse response = weeklyScheduleService.updateStatus(id, request.getStatus());
         return ResponseEntity.ok(response);
     }
 

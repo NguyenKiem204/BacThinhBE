@@ -5,6 +5,7 @@ import com.bacthinh.BacThinh.dto.request.UpdateWeeklyScheduleRequest;
 import com.bacthinh.BacThinh.dto.request.WeeklyScheduleSearchRequest;
 import com.bacthinh.BacThinh.dto.response.PagedWeeklyScheduleResponse;
 import com.bacthinh.BacThinh.dto.response.WeeklyScheduleResponse;
+import com.bacthinh.BacThinh.entity.ScheduleStatus;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,5 +19,6 @@ public interface WeeklyScheduleService {
     WeeklyScheduleResponse getWeeklyScheduleByDate(LocalDate date);
     List<WeeklyScheduleResponse> getWeeklySchedulesByDateRange(LocalDate startDate, LocalDate endDate);
     WeeklyScheduleResponse publishWeeklySchedule(Long id);
+    WeeklyScheduleResponse updateStatus(Long id, ScheduleStatus status);
     WeeklyScheduleResponse archiveWeeklySchedule(Long id);
 }

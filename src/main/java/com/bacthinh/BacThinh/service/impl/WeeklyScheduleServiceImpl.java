@@ -183,6 +183,14 @@ public class WeeklyScheduleServiceImpl implements WeeklyScheduleService {
         log.info("Successfully published weekly schedule with ID: {}", id);
         return weeklyScheduleMapper.toResponse(updatedSchedule);
     }
+    @Override
+    public WeeklyScheduleResponse updateStatus(Long id, ScheduleStatus status) {
+        WeeklySchedule schedule = weeklyScheduleRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Weekly schedule not found with ID: " + id));
+        schedule.setStatus(status);
+        WeeklySchedule updated = weeklyScheduleRepository.save(schedule);
+        return weeklyScheduleMapper.toResponse(updated);
+    }
 
     @Override
     public WeeklyScheduleResponse archiveWeeklySchedule(Long id) {
